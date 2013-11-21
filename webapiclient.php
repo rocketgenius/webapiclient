@@ -23,8 +23,6 @@ if(class_exists("GFForms")){
         protected $_title = "Gravity Forms Web API Client";
         protected $_short_title = "Web API Client";
 
-        protected $_enable_rg_autoupgrade = true;
-
         public function plugin_page(){
 
             if($this->is_form_list_page()){

@@ -325,24 +325,35 @@ class GFWebAPIWrapper{
 
     //------------------- HELPER METHODS ---------------------------------------
 
-    private function prepare_response($response){
+    private function prepare_response($raw_response){
 
-        if(is_wp_error($response))
-            return new GFWebAPIError($response->get_error_code(), $response->get_error_message(), $response->get_error_data());
+        if(is_wp_error($raw_response))
+            return new GFWebAPIError($raw_response->get_error_code(), $raw_response->get_error_message(), $raw_response->get_error_data());
 
-        if(!in_array($response["response"]["code"], array("200", "201", "202")))
-            return new GFWebAPIError("Http: " . $response["response"]["code"], $response["response"]["message"]);
+        if($raw_response["response"]["code"] != 200)
+            return new GFWebAPIError("Http: " . $raw_response["response"]["code"], $raw_response["response"]["message"]);
 
-        $json = json_decode($response["body"], true);
-        if(!isset($json)){
-            return new GFWebAPIError("InvalidResponse", "An invalid JSON string was returned by the server.", $response["body"]);
+        $body = json_decode($raw_response["body"], true);
+        if(!isset($body)){
+            return new GFWebAPIError("InvalidResponse", "An invalid JSON string was returned by the server.", $raw_response["body"]);
         }
 
-        if(isset($json["status"]) && isset($json["code"]) && $json["status"] == "error")
-            return new GFWebAPIError($json["code"], $json["message"], $response["body"]);
+        $status = $body["status"];
+        $response = $body["response"];
+
+        if(!in_array($status, array(200, 201, 202))){
+            if(is_array($response)){
+                $data = isset($response["data"]) ? $response["data"] : "";
+                return new GFWebAPIError("Status: " . $status, $response["code"] . " - " . $response["message"], $data);
+            } else {
+                return new GFWebAPIError("Status: " . $status, $response);
+            }
+
+        }
+
 
         //TODO: support returning JSON string as well
-        return $json;
+        return $response;
     }
 
     private function send_request($method, $route, $query=null, $body=null){
