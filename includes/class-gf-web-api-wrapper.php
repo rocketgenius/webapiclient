@@ -360,7 +360,7 @@ class GFWebAPIWrapper{
 
         $url = $this->get_url($method, $route, $query);
 
-        return wp_remote_request($url, array("method" => $method, "body"=>$body));
+        return wp_remote_request($url, array("method" => $method, "body"=>$body, "timeout" => 25));
     }
 
     private function get_url($method, $route, $query=null)
