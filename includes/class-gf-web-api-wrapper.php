@@ -167,35 +167,39 @@ class GFWebAPIWrapper{
      * Returns a list of entries based on the specified parameters.
      * @param int $form_id - The form id whose entries will be returned
      * @param array $search - An array specifying the search criteria.
-     *   Filter by any column in the main table
-     *     $search["status"] = "active";
-     *     $search["currency"] = "USD";
-     *     $search["is_read"] = true;
+     *  Filter by status
+     *     $search_criteria["status"] = "active";
      *
      *  Filter by date range
-     *     $search["start_date"] =  $start_date;
-     *     $search["end_date"] =  $end_date;
+     *     $search_criteria["start_date"] = $start_date;
+     *     $search_criteria["end_date"] =  $end_date;
+     *
+     *  Filter by any column in the main table
+     *     $search_criteria["field_filters"][] = array("key" => "currency", value => "USD");
+     *     $search_criteria["field_filters"][] = array("key" => "is_read", value => true);
      *
      *  Filter by Field Values
-     *     Filter by a radio button value
-     *     $search["field_filters"][] = array('type' => 'field', 'key' => "1", 'value' => "gquiz159982170");
+     *     $search_criteria["field_filters"][] = array('key' => "1", 'value' => "gquiz159982170");
+     *
+     *  Filter by a checkbox value (not recommended)
+     *     $search_criteria["field_filters"][] = array('key' => "2.2", 'value' => "gquiz246fec995");
+     *     note: this will work for checkboxes but it won't work if the checkboxes have been re-ordered - best to use the following example below
      *
      *  Filter by a checkbox value (recommended)
-     *     $search["field_filters"][] = array('type' => 'field', 'key' => "2", 'value' => "gquiz246fec995");
+     *     $search_criteria["field_filters"][] = array('key' => "2", 'value' => "gquiz246fec995");
      *
-     *  Filter by a global search of values of any field
-     *     $search["field_filters"][] = array('type' => 'global', 'value' => $search_value);
+     *  Filter by a global search of values of any form field
+     *     $search_criteria["field_filters"][] = array('value' => $search_value);
+     *  OR
+     *     $search_criteria["field_filters"][] = array('key' => 0, 'value' => $search_value);
      *
      *  Filter entries by Entry meta (added using the gform_entry_meta hook)
-     *     $search["field_filters"][] = array('type' => 'meta', 'key' => "gquiz_score", 'value' => "1");
-     *     $search["field_filters"][] = array('type' => 'meta', 'key' => "gquiz_is_pass", 'value' => "1");
-     *
-     *  Filter by a global search of values of any field
-     *     $search["field_filters"][] = array('type' => 'global', 'value' => $search_value);
+     *     $search_criteria["field_filters"][] = array('key' => "gquiz_score", 'value' => "1");
+     *     $search_criteria["field_filters"][] = array('key' => "gquiz_is_pass", 'value' => "1");
      *
      *  Filter by ALL / ANY of the field filters
-     *     $search["field_filters"]["mode"] = "all"; // default
-     *     $search["field_filters"]["mode"] = "any";
+     *     $search_criteria["field_filters"]["mode"] = "all"; // default
+     *     $search_criteria["field_filters"]["mode"] = "any";
      *
      * @param array $sorting - Specifies how the entries should be sorted. Entries can be sorted by a column in the lead table, by a field or by an entry meta. Following is the format.
      *     $sorting = array('key' => $sort_field, 'direction' => $sort_direction );
@@ -210,6 +214,7 @@ class GFWebAPIWrapper{
 
         $query["sorting"] = $sorting;
         $query["paging"] = $paging;
+        $query["search"] = $search;
 
         $response = $this->send_request("GET", "forms/{$form_id}/entries", $query);
 
