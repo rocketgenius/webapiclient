@@ -413,7 +413,7 @@ if(class_exists("GFForms")){
         <?php
         }
 
-        protected function styles(){
+        public function styles(){
 
             $my_styles =
                         array(
